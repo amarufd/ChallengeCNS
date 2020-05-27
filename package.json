@@ -1,0 +1,22 @@
+{
+  "name": "challengecns",
+  "version": "1.0.0",
+  "description": "challenge de cns isMutate",
+  "main": "handler.py",
+  "scripts": {
+    "test": "echo \\\"Error: no test specified\\\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amarufd/ChallengeCNS.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/amarufd/ChallengeCNS/issues"
+  },
+  "homepage": "https://github.com/amarufd/ChallengeCNS#readme",
+  "dependencies": {
+    "serverless-python-requirements": "^5.1.0"
+  }
+}

@@ -1,0 +1,31 @@
+service: lambda-ismutate
+
+custom:
+  pythonRequirements:
+    dockerizePip: non-linux
+
+  defaultProyecto: "Ejercicio is mutate Consorcio"
+
+  Proyecto: challengeCNS
+  region: us-east-2
+  stage: dev
+  apiNamePrefix: dev
+
+provider:
+  name: aws
+  runtime: python3.6
+  apiKeys:
+    - ismutate-key
+  stackTags:
+    Proyecto: ${self:custom.Proyecto}
+  region: ${self:custom.region}
+
+functions:
+  proyeccion:
+    handler: handler.ismutate
+    timeout: 30
+    events:
+      - http:
+          path: ismutate
+          method: post
+
