@@ -1,5 +1,5 @@
+from utils.funciones import *
 from utils.IsMutateError import *
-#import numpy as np
 import time, json
 import sys, traceback
 
@@ -17,6 +17,8 @@ def ismutate(event, context):
         respuesta,tiempoEjecucion = isMutateUnFor(mxADN)
 
         print("Respuesta: ",respuesta," - Tiempo Ejecucion: ",tiempoEjecucion)
+
+        guardarRegistro(respuesta,jsonADN)
         
         
         body = {
@@ -74,7 +76,6 @@ def ismutate(event, context):
         }
         return response
 
-
 def isMutateUnFor(mxADN):
     start_time = time.time()
     conteoMutate = 0
@@ -109,3 +110,61 @@ def isMutateUnFor(mxADN):
     
     return conteoMutate >= 2, (time.time() - start_time)
 
+def statistic(event, context):
+    try:
+        start_time = time.time()
+        
+        body = {
+            "isMutate": "mucho",
+            "tiempo": "lucho"
+        }
+
+        response = {
+            "statusCode": 200,
+            "body": json.dumps(body)
+        }
+
+        return response
+
+    except ServicioError as e:
+        print("error de servicio")
+
+        body = {
+            "mensaje": str(e)
+        }
+
+        response = {
+            "statusCode": 500,
+            "body": json.dumps(body)
+        }
+        return response
+
+    except IsMutateError as e:
+        print("error de negocio")
+
+        body = {
+           "mensaje": str(e)
+        }
+
+        response = {
+           "statusCode": 409,
+           "body": json.dumps(body)
+        }
+        return response
+        
+    except Exception as e:
+        print("error no esperado")
+        print(traceback.format_exc())
+
+
+        print (e)
+        body = {
+            "mensaje": "Error al realizar la consulta",
+            "ex": str(e)
+        }
+
+        response = {
+            "statusCode": 500,
+            "body": json.dumps(body)
+        }
+        return response

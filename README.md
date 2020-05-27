@@ -1,14 +1,16 @@
-[![](https://www.consorcio.cl/documents/10180/13865848/logo-consorcio-home.png)](https://consorcio.cl)
-# Lambda Cotizadores proyeccion ahorro.  #
+# Lambda isMutate an statistic  #
 
 ### Descripción ###
 
-* Proyecto Serverless Service cuya finalidad es entregar la proyección de ahorro.
+* Ejercicio que analiza si el DNA recibido por el servicio es de un mutante o humano.
+* Creando estadistica de ello
 
-### Backend (alias) asociado
+### endpoints
+
+isMutate
+statistic
 
 
-on-crm-sales-negocio
 
 ### Instalación y configuración ###
 
@@ -17,29 +19,16 @@ on-crm-sales-negocio
 
 ##### Instrucciones de deploy:
 
-Los parámetros para el deploy a tener en cuenta son los siguientes:
-* **cc**: Centro de Costos asociado al ambiente donde se está instalando. Valor por defecto=55100
-* **proyecto**: Nombre del proyecto asociado al requerimiento de desarrollo (se sugiere omitir y dejar por defecto)
-* **layerStage**: ambiente en cual se está instalado, valores posibles: dev, qa, prod
-* **urlBaseMicroservicios**: URL base de microservicios. 
+Al momento de deployar los lambdas deben estar definidas las siguientes variables:
+* **awsSecretStoreArn**: storage donde se encuentran las llaves de acceso a la base de datos
+* **database**: nombre de la base de datos
+* **dbClusterOrInstanceArn**: arn del cluster de base de datos
 
 
-Ejecutar el comando deploy en QA
+Ejecutar el comando deploy
 ```sh
-$ serverless deploy --cc 26850 --layerStage QA
+$ serverless deploy
 
-```
-
-Ejecutar el comando deploy en dev
-```sh
-$ serverless deploy --cc 26850 --layerStage dev
-
-```
-
-##### Instrucciones para desarrollo local:
-Para probar localmente ejecutar lo siguiente:
-```sh
-sls offline --noTimeout
 ```
 
 
