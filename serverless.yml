@@ -1,15 +1,19 @@
 service: lambda-ismutate
 
 custom:
-  pythonRequirements:
-    dockerizePip: non-linux
-
   defaultProyecto: "Ejercicio is mutate Consorcio"
 
   Proyecto: challengeCNS
   region: us-east-2
   stage: dev
   apiNamePrefix: dev
+
+  userbd: 
+  passbd: 
+
+  awsSecretStoreArn: 
+  database: 
+  dbClusterOrInstanceArn: 
 
 provider:
   name: aws
@@ -19,13 +23,38 @@ provider:
   stackTags:
     Proyecto: ${self:custom.Proyecto}
   region: ${self:custom.region}
+  environment:
+    awsSecretStoreArn: ${self:custom.awsSecretStoreArn}
+    database: ${self:custom.database}
+    dbClusterOrInstanceArn: ${self:custom.dbClusterOrInstanceArn}
 
 functions:
-  proyeccion:
+  ismutate:
     handler: handler.ismutate
     timeout: 30
     events:
       - http:
           path: ismutate
           method: post
+  statistic:
+    handler: handler.statistic
+    timeout: 30
+    events:
+      - http:
+          path: statistic
+          method: get
 
+resources:
+  Resources:
+    CreateClusterAurora:
+      Type: AWS::RDS::DBCluster
+      Properties:
+        DatabaseName: isMutant
+        DBClusterIdentifier: mi-serverless-clister-ismutant
+        DeletionProtection: false
+        EnableHttpEndpoint: true
+        Engine: aurora
+        EngineMode: serverless
+        MasterUsername: ${self:custom.userbd}
+        MasterUserPassword: ${self:custom.passbd}
+        SourceRegion: ${self:custom.region}

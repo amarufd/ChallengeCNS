@@ -18,12 +18,23 @@ def ismutate(event, context):
 
         print("Respuesta: ",respuesta," - Tiempo Ejecucion: ",tiempoEjecucion)
 
-        guardarRegistro(respuesta,jsonADN)
+        isOk = guardarRegistro(respuesta,jsonADN)
         
+        if isOk == -1:
+            print("error en el guardado de la base de datos")
+
+            body = {
+                "mensaje": "error en el guardado de la base de datos"
+            }
+
+            response = {
+                "statusCode": 500,
+                "body": json.dumps(body)
+            }
+            return response
         
         body = {
-            "isMutate": respuesta,
-            "tiempo": tiempoEjecucion
+            "isMutate": respuesta
         }
 
         response = {
@@ -114,9 +125,25 @@ def statistic(event, context):
     try:
         start_time = time.time()
         
+        mutantes,humanos = consultaEstadisticas()
+        if mutantes == -1 | humanos == -1:
+            print("error en la consulta de base de datos")
+
+            body = {
+                "mensaje": "error en el guardado de la base de datos"
+            }
+
+            response = {
+                "statusCode": 500,
+                "body": json.dumps(body)
+            }
+            return response
+        ratio = mutantes/(mutantes+humanos)
+
         body = {
-            "isMutate": "mucho",
-            "tiempo": "lucho"
+            "count_mutant_dna": mutantes,
+            "count_human_dna": humanos,
+            "ratio": ratio
         }
 
         response = {

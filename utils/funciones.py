@@ -5,7 +5,7 @@ import sys, traceback
 from utils.IsMutateError import *
 
 awsSecretStoreArn = os.environ['awsSecretStoreArn'],
-database = os.environ['database']
+database = "isMutant"
 dbClusterOrInstanceArn = os.environ['dbClusterOrInstanceArn']
 
 #Funciones
@@ -24,52 +24,28 @@ def guardarRegistro(respuesta,jsonADN):
         response = client.execute_statement(
             continueAfterTimeout=False,
             secretArn = os.environ['awsSecretStoreArn'],
-            database = "isMutant",
+            database = database,
             resourceArn = os.environ['dbClusterOrInstanceArn'],
             sql = sqlInsert
         )
+
+        return 0
+    
     except ServicioError as e:
         print("error de servicio")
 
-        body = {
-            "mensaje": str(e)
-        }
-
-        response = {
-            "statusCode": 500,
-            "body": json.dumps(body)
-        }
-        return response
+        return -1
 
     except IsMutateError as e:
         print("error de negocio")
 
-        body = {
-           "mensaje": str(e)
-        }
-
-        response = {
-           "statusCode": 409,
-           "body": json.dumps(body)
-        }
-        return response
+        return -1
         
     except Exception as e:
         print("error no esperado")
         print(traceback.format_exc())
-
-
         print (e)
-        body = {
-            "mensaje": "Error al realizar la consulta",
-            "ex": str(e)
-        }
-
-        response = {
-            "statusCode": 500,
-            "body": json.dumps(body)
-        }
-        return response
+        return -1
         
 
 def selectRegistros():
@@ -90,3 +66,51 @@ def selectRegistros():
         RisMut = user[1]['booleanValue']
         Rdna  = user[2]['stringValue']
         print(Rid , ' ' , RisMut , ' ' , Rdna)
+
+
+def consultaEstadisticas():
+    try:
+        client = boto3.client('rds-data')
+        
+        response = client.execute_statement(
+            continueAfterTimeout=False,
+            secretArn = os.environ['awsSecretStoreArn'],
+            database = database,
+            resourceArn = os.environ['dbClusterOrInstanceArn'],
+            sql = "SELECT COUNT( * ) FROM CONSULTASDNA WHERE ISMUTANT IS TRUE"
+        )
+
+        mutantes = 0
+        for user in response['records']:
+            mutantes = user[0]['longValue']
+
+        response = client.execute_statement(
+            continueAfterTimeout=False,
+            secretArn = os.environ['awsSecretStoreArn'],
+            database = database,
+            resourceArn = os.environ['dbClusterOrInstanceArn'],
+            sql = "SELECT COUNT( * ) FROM CONSULTASDNA WHERE ISMUTANT IS FALSE"
+        )
+
+        humanos = 0
+        for user in response['records']:
+            humanos = user[0]['longValue']
+
+        return mutantes,humanos
+
+
+    except ServicioError as e:
+        print("error de servicio")
+
+        return -1,-1
+
+    except IsMutateError as e:
+        print("error de negocio")
+
+        return -1,-1
+        
+    except Exception as e:
+        print("error no esperado")
+        print(traceback.format_exc())
+        print (e)
+        return -1,-1
