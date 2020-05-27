@@ -36,6 +36,7 @@ functions:
       - http:
           path: ismutate
           method: post
+          private: true
   statistic:
     handler: handler.statistic
     timeout: 30
@@ -43,6 +44,7 @@ functions:
       - http:
           path: statistic
           method: get
+          private: true
 
 resources:
   Resources:
