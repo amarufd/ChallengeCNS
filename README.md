@@ -7,10 +7,23 @@
 
 ### endpoints
 
-isMutate
-statistic
+post - https://tkx47lnfx9.execute-api.us-east-2.amazonaws.com/dev/ismutate
 
+```json
+{
+    "dna": [
+        "ATGTGA",
+        "CAGTGC",
+        "TTATGT",
+        "AGAAGG",
+        "CCCGTA",
+        "TCACTG"
+    ]
+}
 
+```
+
+get - https://tkx47lnfx9.execute-api.us-east-2.amazonaws.com/dev/statistic
 
 ### Instalación y configuración ###
 
@@ -19,7 +32,7 @@ statistic
 
 ##### Instrucciones de deploy:
 
-Al momento de deployar los lambdas deben estar definidas las siguientes variables:
+Para que los servicios logren coneccion con la base de datos en el archivo **serverless.yaml** las siguientes variables:
 * **awsSecretStoreArn**: storage donde se encuentran las llaves de acceso a la base de datos
 * **database**: nombre de la base de datos
 * **dbClusterOrInstanceArn**: arn del cluster de base de datos
@@ -30,6 +43,6 @@ Ejecutar el comando deploy
 $ serverless deploy
 
 ```
-
+El comando anterior ejecuta la creacion de los lambdas 
 
 

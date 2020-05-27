@@ -5,7 +5,7 @@ import sys, traceback
 from utils.IsMutateError import *
 
 awsSecretStoreArn = os.environ['awsSecretStoreArn'],
-database = "isMutant"
+database = 
 dbClusterOrInstanceArn = os.environ['dbClusterOrInstanceArn']
 
 #Funciones
