@@ -1,9 +1,8 @@
-# Lambda isMutate an statistic  #
+# Lambda isMutate y statistic  #
 
 ### Descripción ###
 
-* Ejercicio que analiza si el DNA recibido por el servicio es de un mutante o humano.
-* Creando estadistica de ello
+Ejercicio que analiza si el DNA recibido por el servicio es de un mutante o humano y crea estadistica de ello
 
 ### endpoints
 
@@ -32,7 +31,7 @@ get - https://tkx47lnfx9.execute-api.us-east-2.amazonaws.com/dev/statistic
 
 ##### Instrucciones de deploy:
 
-Para que los servicios logren coneccion con la base de datos en el archivo **serverless.yaml** las siguientes variables:
+Para que los servicios logren conexión con la base de datos en el archivo **serverless.yaml** se deben completar las siguientes variables:
 * **awsSecretStoreArn**: storage donde se encuentran las llaves de acceso a la base de datos
 * **database**: nombre de la base de datos
 * **dbClusterOrInstanceArn**: arn del cluster de base de datos
@@ -43,6 +42,6 @@ Ejecutar el comando deploy
 $ serverless deploy
 
 ```
-El comando anterior ejecuta la creacion de los lambdas 
+El comando anterior ejecuta la creacion de los lambdas y la creacion de cluster de base de datos
 
 
