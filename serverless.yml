@@ -1,62 +1,112 @@
 service: lambda-ismutate
 
 custom:
+  pythonRequirements:
+    dockerizePip: non-linux
   defaultProyecto: "Ejercicio is mutate Consorcio"
-
   Proyecto: challengeCNS
-  region: us-east-2
-  stage: dev
+  region: us-east-1
+  defaultStage: dev
+  currentStage: ${opt:stage, self:custom.defaultStage} # 'dev' is default unless overriden by --stage flag
   apiNamePrefix: dev
-
-  userbd: 
-  passbd: 
-
-  awsSecretStoreArn: 
-  database: 
-  dbClusterOrInstanceArn: 
+  dnaTableName: 'dnas-table-${self:custom.currentStage}'
+  countTableName: 'count-table-${self:custom.currentStage}'
 
 provider:
   name: aws
   runtime: python3.6
   apiKeys:
     - ismutate-key
+    - ismutate-key-${self:custom.currentStage}
   stackTags:
     Proyecto: ${self:custom.Proyecto}
   region: ${self:custom.region}
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:Query"
+        - "dynamodb:GetItem"
+        - "dynamodb:PutItem"
+        - "dynamodb:UpdateItem"
+        - "dynamodb:DeleteItem"
+      Resource: { Fn::GetAtt: [dnasTable, Arn]}
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:Query"
+        - "dynamodb:Scan"
+        - "dynamodb:GetItem"
+        - "dynamodb:PutItem"
+        - "dynamodb:UpdateItem"
+        - "dynamodb:DeleteItem"
+      Resource: { Fn::GetAtt: [countTable, Arn]}
   environment:
-    awsSecretStoreArn: ${self:custom.awsSecretStoreArn}
-    database: ${self:custom.database}
-    dbClusterOrInstanceArn: ${self:custom.dbClusterOrInstanceArn}
+    DNAS_TABLE: ${self:custom.dnaTableName}
+    COUNT_TABLE: ${self:custom.countTableName}
 
 functions:
-  ismutate:
+  esMutante:
+    name: ${self:custom.currentStage}-esMutante
     handler: handler.ismutate
     timeout: 30
     events:
       - http:
           path: ismutate
           method: post
-          private: true
-  statistic:
-    handler: handler.statistic
+          # private: true
+  stats:
+    name: ${self:custom.currentStage}-stats
+    handler: handler.stats
     timeout: 30
     events:
       - http:
-          path: statistic
+          path: stats
           method: get
-          private: true
+          # private: true
+  actualizaContador:
+    name: ${self:custom.currentStage}-actualizaContador
+    handler: streamHandler.actualiza_contador
+    timeout: 10
+    events:
+    - stream:
+        type: dynamodb
+        arn: { Fn::GetAtt: [dnasTable, StreamArn]}
+        batchSize: 1
 
 resources:
   Resources:
-    CreateClusterAurora:
-      Type: AWS::RDS::DBCluster
+    dnasTable:
+      Type: AWS::DynamoDB::Table
       Properties:
-        DatabaseName: isMutant
-        DBClusterIdentifier: mi-serverless-clister-ismutant
-        DeletionProtection: false
-        EnableHttpEndpoint: true
-        Engine: aurora
-        EngineMode: serverless
-        MasterUsername: ${self:custom.userbd}
-        MasterUserPassword: ${self:custom.passbd}
-        SourceRegion: ${self:custom.region}
+        TableName: ${self:custom.dnaTableName}
+        AttributeDefinitions:
+          - 
+            AttributeName: cadenaDna
+            AttributeType: S
+          - 
+            AttributeName: esMutante
+            AttributeType: S
+        KeySchema:
+          - 
+            AttributeName: cadenaDna
+            KeyType: HASH
+          - 
+            AttributeName: esMutante
+            KeyType: RANGE
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE
+        BillingMode : "PAY_PER_REQUEST" #Usamos pay_per_request para soportar la demanda inpredecible de 100 o 1.000.000 de request por segundo. Si acotaramos la demanda podriamos provisionar recursos bajando los costos significativamente.
+        # ProvisionedThroughput:
+        #   ReadCapacityUnits: 1
+        #   WriteCapacityUnits: 1
+    countTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.countTableName}
+        AttributeDefinitions:
+          - 
+            AttributeName: id
+            AttributeType: N
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode : "PAY_PER_REQUEST"

@@ -1,7 +1,9 @@
-from utils.funciones import *
 from utils.IsMutateError import *
+#import numpy as np
 import time, json
 import sys, traceback
+import boto3
+import os
 
 def ismutate(event, context):
     try:
@@ -17,24 +19,11 @@ def ismutate(event, context):
         respuesta,tiempoEjecucion = isMutateUnFor(mxADN)
 
         print("Respuesta: ",respuesta," - Tiempo Ejecucion: ",tiempoEjecucion)
-
-        isOk = guardarRegistro(respuesta,jsonADN)
         
-        if isOk == -1:
-            print("error en el guardado de la base de datos")
-
-            body = {
-                "mensaje": "error en el guardado de la base de datos"
-            }
-
-            response = {
-                "statusCode": 500,
-                "body": json.dumps(body)
-            }
-            return response
         
         body = {
-            "isMutate": respuesta
+            "isMutate": respuesta,
+            "tiempo": tiempoEjecucion
         }
 
         response = {
@@ -42,7 +31,11 @@ def ismutate(event, context):
             "body": json.dumps(body)
         }
 
+        dynamodb = boto3.client('dynamodb')
+        dynamodb.put_item(TableName=os.environ['DNAS_TABLE'], Item={'cadenaDna':{'S': event['body']}, 'esMutante':{'S': str(respuesta)}})
+
         return response
+
 
     except ServicioError as e:
         print("error de servicio")
@@ -86,6 +79,23 @@ def ismutate(event, context):
             "body": json.dumps(body)
         }
         return response
+
+
+def stats(event, context):
+    try:
+        dynamodb = boto3.client('dynamodb')
+        response = dynamodb.get_item(Key={'id': 1})
+
+        return response['Item']
+        
+        # response = {
+        #     "count_mutant_dna": 200,
+        #     "count_human_dna": json.dumps(body),
+        #     "ratio": 
+        # }
+    
+    except Exception as e:
+        print(traceback.format_exc())
 
 def isMutateUnFor(mxADN):
     start_time = time.time()
@@ -121,77 +131,3 @@ def isMutateUnFor(mxADN):
     
     return conteoMutate >= 2, (time.time() - start_time)
 
-def statistic(event, context):
-    try:
-        start_time = time.time()
-        
-        mutantes,humanos = consultaEstadisticas()
-        if mutantes == -1 | humanos == -1:
-            print("error en la consulta de base de datos")
-
-            body = {
-                "mensaje": "error en el guardado de la base de datos"
-            }
-
-            response = {
-                "statusCode": 500,
-                "body": json.dumps(body)
-            }
-            return response
-        ratio = mutantes/(mutantes+humanos)
-
-        body = {
-            "count_mutant_dna": mutantes,
-            "count_human_dna": humanos,
-            "ratio": ratio
-        }
-
-        response = {
-            "statusCode": 200,
-            "body": json.dumps(body)
-        }
-
-        return response
-
-    except ServicioError as e:
-        print("error de servicio")
-
-        body = {
-            "mensaje": str(e)
-        }
-
-        response = {
-            "statusCode": 500,
-            "body": json.dumps(body)
-        }
-        return response
-
-    except IsMutateError as e:
-        print("error de negocio")
-
-        body = {
-           "mensaje": str(e)
-        }
-
-        response = {
-           "statusCode": 409,
-           "body": json.dumps(body)
-        }
-        return response
-        
-    except Exception as e:
-        print("error no esperado")
-        print(traceback.format_exc())
-
-
-        print (e)
-        body = {
-            "mensaje": "Error al realizar la consulta",
-            "ex": str(e)
-        }
-
-        response = {
-            "statusCode": 500,
-            "body": json.dumps(body)
-        }
-        return response
